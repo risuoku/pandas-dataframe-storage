@@ -28,22 +28,14 @@ def prepare(st):
 
 
 def split(st, idx, *args, **kwargs):
-    print('=== print origin')
-    print(st.sync_origin())
-    st.sync_meta()
-    print('')
     print('=== print split .. idx: {}'.format(idx))
     print(st.sync_splited(int(idx))(*args))
     print('')
 
 
 def merge(st):
-    print('=== print origin')
-    print(st.sync_origin())
-    st.sync_meta()
-    print('')
-    print('=== print result')
-    print(st.sync_result().sort_index())
+    print('=== print merged')
+    print(st.sync_merged().sort_index())
 
 
 if __name__ == '__main__':

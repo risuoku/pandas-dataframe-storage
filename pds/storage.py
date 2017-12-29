@@ -28,7 +28,7 @@ class Storage:
         self.origin_dir = os.path.join(self.storage_dir_path, 'origin')
         self.meta_dir = os.path.join(self.storage_dir_path, 'meta')
         self.splited_dir = os.path.join(self.storage_dir_path, 'splited')
-        self.result_dir = os.path.join(self.storage_dir_path, 'result')
+        self.merged_dir = os.path.join(self.storage_dir_path, 'merged')
         self.value_origin = None
         if random_seed is not None:
             random.seed(random_seed)
@@ -42,15 +42,18 @@ class Storage:
         os.makedirs(self.origin_dir, exist_ok = True)
         os.makedirs(self.meta_dir, exist_ok = True)
         os.makedirs(self.splited_dir, exist_ok = True)
-        os.makedirs(self.result_dir, exist_ok = True)
+        os.makedirs(self.merged_dir, exist_ok = True)
+
+        # load origin if exist
+        self.value_origin = from_pickle(os.path.join(self.origin_dir, self.origin_file_name))
 
         return self
 
     def get_meta_file_name(self):
         return 'meta_' + self.origin_file_name
 
-    def get_result_file_name(self):
-        return 'result_' + self.origin_file_name
+    def get_merged_file_name(self):
+        return 'merged_' + self.origin_file_name
 
     def get_splited_file_name(self, splited_idx):
         return 'splited_{}_{}'.format(splited_idx, self.origin_file_name)
@@ -110,18 +113,17 @@ class Storage:
             return self.transform(dfc, *args, **kwargs)
         return cache_located_at(os.path.join(self.splited_dir, self.get_splited_file_name(splited_idx)))(_wrapped_func)
 
-    def sync_result(self):
+    def sync_merged(self):
         files = set(os.listdir(self.splited_dir))
         all_candidate_files = set(self.get_splited_file_name(i) for i in range(self.num_split))
         diff_files = all_candidate_files - files
         if not len(diff_files) == 0:
             raise Exception('some splited files does not exist ... diff: {}'.format(diff_files))
         result = pd.concat([from_pickle(os.path.join(self.splited_dir, name)) for name in list(all_candidate_files)])
-        to_pickle(os.path.join(self.result_dir, self.get_result_file_name()), result)
+        to_pickle(os.path.join(self.merged_dir, self.get_merged_file_name()), result)
         return result
 
-
-    def load_origin(self):
+    def load_origin(self, *args, **kwargs):
         raise NotImplementedError()
 
     def transform(self, df, *args, **kwargs):

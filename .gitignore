@@ -6,3 +6,14 @@ bin
 share
 pip-selfcheck.json
 _storage
+man
+
+*.egg-info
+*.pot
+*.py[co]
+__pycache__
+MANIFEST
+dist/
+build/
+
+update_package.sh
